@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 
 public class ExecProcess {
     private Process process = null;
@@ -28,10 +29,13 @@ public class ExecProcess {
         return name;
     }
 
-    public void execute(File workingDirectory, Log log, String... args) {
+    public void execute(File workingDirectory, Log log, Map<String, String> environment, String... args) {
         final ProcessBuilder pb = new ProcessBuilder();
         log.info("Using working directory for this process: " + workingDirectory);
         pb.directory(workingDirectory);
+        if( environment != null  ){
+        	pb.environment().putAll( environment );
+        }
         pb.command(args);
         try {
             process = pb.start();
