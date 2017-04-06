@@ -9,11 +9,35 @@
 
   <name>Process execution maven plugin</name>
 
+  <description>Start multiple processes in pre-integration-test phase and stop same processes in post-integration-test phase</description>
+  <url>https://github.com/chonton/process-exec-maven-plugin</url>
+  <inceptionYear>2017</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>maven central</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>chas honton</name>
+      <email>chas@honton.org</email>
+      <url>https://www.linkedin.com/in/chonton</url>
+    </developer>
+    <developer>
+      <name>bazaarvoice</name>
+      <url>http:/www.bazaarvoice.com/</url>
+    </developer>
+  </developers>
+
   <scm>
-    <connection>scm:git:git@github.com:bazaarvoice/maven-process-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:bazaarvoice/maven-process-plugin.git</developerConnection>
+    <connection>scm:git@github.com:chonton/process-exec-maven-plugin.git</connection>
+    <developerConnection>scm:git@github.com:chonton/process-exec-maven-plugin.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/bazaarvoice/maven-process-plugin</url>
+    <url>https://github.com/chonton/process-exec-maven-plugin</url>
   </scm>
 
   <properties>
