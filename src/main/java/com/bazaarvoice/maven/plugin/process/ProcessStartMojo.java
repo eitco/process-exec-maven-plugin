@@ -1,6 +1,9 @@
 package com.bazaarvoice.maven.plugin.process;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -8,6 +11,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Arrays;
 
 @Mojo (name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
 public class ProcessStartMojo extends AbstractProcessMojo {
@@ -27,7 +31,7 @@ public class ProcessStartMojo extends AbstractProcessMojo {
                 getLog().info("env: " + entry.getKey() +"=" + entry.getValue());
         	}
         }
-        getLog().info("Full command line: " + Joiner.on(" ").join(arguments));
+        getLog().info("Full command line: " + Joiner.on(" ").useForNull("[null argument omitted]").join(arguments));
         try {
             startProcess();
             if (waitForInterrupt) {
@@ -44,7 +48,11 @@ public class ProcessStartMojo extends AbstractProcessMojo {
             exec.setProcessLogFile(new File(processLogFile));
         }
         getLog().info("Starting process: " + exec.getName());
-        exec.execute(processWorkingDirectory(), getLog(), environment, arguments);
+
+        Iterable<String> nonNullArgumentList = Iterables.filter(Arrays.asList(arguments), Predicates.notNull());
+        String[] nonNullArguments = Iterables.toArray(nonNullArgumentList, String.class);
+        
+        exec.execute(processWorkingDirectory(), getLog(), environment, nonNullArguments);
         CrossMojoState.addProcess(exec, getPluginContext());
         ProcessHealthCondition.waitSecondsUntilHealthy(healthcheckUrl, waitAfterLaunch, healthcheckValidateSsl);
         getLog().info("Started process: " + exec.getName());

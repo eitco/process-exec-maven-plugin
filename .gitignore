@@ -3,10 +3,8 @@
 *.iws
 .idea
 .classpath
-.settings/
-
-target/
-war/
-
+.settings
+.project
+target
 *.log
 .DS_Store
