@@ -36,6 +36,9 @@ public abstract class AbstractProcessMojo extends AbstractMojo {
         this.healthcheckUrl.setUrl(new URL(url));
     }
 
+    @Parameter(property = "exec.healthcheckValidateSsl", defaultValue = "true")
+    protected boolean healthcheckValidateSsl;
+
     @Parameter(property = "exec.waitAfterLaunch", required = false, defaultValue = "30")
     protected int waitAfterLaunch;
 
