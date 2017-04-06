@@ -1,4 +1,4 @@
-package com.bazaarvoice.maven.plugin.process;
+package org.honton.chas.process.exec.maven.plugin;
 
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
