@@ -36,7 +36,6 @@
   <scm>
     <connection>scm:git@github.com:chonton/process-exec-maven-plugin.git</connection>
     <developerConnection>scm:git@github.com:chonton/process-exec-maven-plugin.git</developerConnection>
-    <tag>HEAD</tag>
     <url>https://github.com/chonton/process-exec-maven-plugin</url>
   </scm>
 
