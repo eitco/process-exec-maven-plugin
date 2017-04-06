@@ -119,12 +119,6 @@
             </goals>
             <phase>process-classes</phase>
           </execution>
-          <execution>
-            <id>help-goal</id>
-            <goals>
-              <goal>helpmojo</goal>
-            </goals>
-          </execution>
         </executions>
       </plugin>
 
@@ -145,8 +139,15 @@
 
   <reporting>
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>3.4</version>
+      </plugin>
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.8</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -168,43 +169,9 @@
   </reporting>
 
   <profiles>
-    <!-- publish site to github,
-    1. mvn [clean install] site
-    2. mvn -P gh-pages pre-site -->
-    <profile>
-      <id>gh-pages</id>
-      <build>
-        <plugins>
-          <!-- push stage to github gh-pages -->
-          <plugin>
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <inherited>false</inherited>
-            <configuration>
-              <message>Site documentation</message>
-              <path>${project.version}</path>
-              <merge>false</merge>
-              <server>github</server>
-              <repositoryName>apm-client</repositoryName>
-              <repositoryOwner>chonton</repositoryOwner>
-              <outputDirectory>${stage}</outputDirectory>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>site</goal>
-                </goals>
-                <phase>pre-site</phase>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
     <!-- release to github
-    mvn clean deploy -P release
-    -->
+  mvn clean deploy -P release
+  -->
     <profile>
       <id>release</id>
       <build>
@@ -213,6 +180,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -227,6 +195,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.9.1</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -240,6 +209,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
+            <version>2.2.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -253,19 +223,13 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.3</version>
+            <extensions>true</extensions>
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
-            <executions>
-              <execution>
-                <id>default-deploy</id>
-                <goals>
-                  <goal>deploy</goal>
-                </goals>
-              </execution>
-            </executions>
           </plugin>
 
         </plugins>
