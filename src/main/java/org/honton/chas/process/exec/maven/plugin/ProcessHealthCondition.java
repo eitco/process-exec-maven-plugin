@@ -1,11 +1,10 @@
 package org.honton.chas.process.exec.maven.plugin;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
@@ -23,7 +22,8 @@ public class ProcessHealthCondition {
   private final int timeoutInSeconds;
   private final boolean validateSsl;
 
-  public ProcessHealthCondition(Log log, HealthCheckUrl healthCheckUrl, int timeoutInSeconds, boolean validateSsl) {
+  public ProcessHealthCondition(Log log, HealthCheckUrl healthCheckUrl, int timeoutInSeconds,
+      boolean validateSsl) {
     this.log = log;
     this.healthCheckUrl = healthCheckUrl;
     this.timeoutInSeconds = timeoutInSeconds;
@@ -38,7 +38,7 @@ public class ProcessHealthCondition {
     }
     final long start = System.currentTimeMillis();
     while ((System.currentTimeMillis() - start) / 1000 < timeoutInSeconds) {
-      if (is200()) {
+      if (isSuccess()) {
         return; // success!!!
       }
       sleep(SECONDS_BETWEEN_CHECKS);
@@ -61,38 +61,37 @@ public class ProcessHealthCondition {
     }
   }
 
-  private boolean is200() {
+  private boolean isSuccess() {
     try {
-      final int code = getResponseCode();
-      return 200 <= code && code < 300;
-    } catch (Exception e) {
+      URL url = healthCheckUrl.getUrl();
+      final URLConnection connection = url.openConnection();
+      if (connection instanceof HttpURLConnection) {
+        return isHttpSuccess(url);
+      }
+
+      // for more general urls, simply a connection without IOException is considered success
+      url.openStream().close();
+      return true;
+    } catch (IOException e) {
+      log.debug(e.getMessage());
       return false;
     }
   }
 
-  private int getResponseCode() {
-    InputStream in = null;
-    try {
-      URL url = healthCheckUrl.getUrl();
-      log.debug("GET " + url);
+  private boolean isHttpSuccess(URL url) throws IOException {
+    final HttpURLConnection http = (HttpURLConnection) url.openConnection();
 
-      final HttpURLConnection http = (HttpURLConnection) url.openConnection();
+    if (http instanceof HttpsURLConnection) {
+      ((HttpsURLConnection) http).setSSLSocketFactory(getFactory());
+    }
 
-      if (http instanceof HttpsURLConnection) {
-        ((HttpsURLConnection) http).setSSLSocketFactory(getFactory());
-      }
-
-      http.setRequestMethod("GET");
-      setHeaders(http);
-      http.connect();
-      in = http.getInputStream();
-      return http.getResponseCode();
-    } catch (ProtocolException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      closeQuietly(in);
+    log.debug("GET " + url);
+    http.setRequestMethod("GET");
+    setHeaders(http);
+    http.connect();
+    try (InputStream in = http.getInputStream()) {
+      final int code = http.getResponseCode();
+      return 200 <= code && code < 300;
     }
   }
 
@@ -114,13 +113,4 @@ public class ProcessHealthCondition {
       throw new RuntimeException(e);
     }
   }
-
-  private static void closeQuietly(Closeable out) {
-    try {
-      if (out != null) {
-        out.close();
-      }
-    } catch (Exception e) {/**/}
-  }
-
 }

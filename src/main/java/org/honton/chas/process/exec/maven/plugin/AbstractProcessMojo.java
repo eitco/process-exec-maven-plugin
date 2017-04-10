@@ -32,7 +32,7 @@ public abstract class AbstractProcessMojo extends AbstractMojo {
 
   public void setHealthCheckUrl(String url) throws MalformedURLException {
     this.healthCheckUrl = new HealthCheckUrl();
-    this.healthCheckUrl.setUrl(new URL(url));
+    this.healthCheckUrl.setUrl(url);
   }
 
   @Parameter(property = "exec.healthCheckValidateSsl", defaultValue = "true")

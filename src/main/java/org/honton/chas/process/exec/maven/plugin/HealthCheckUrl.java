@@ -1,7 +1,9 @@
 package org.honton.chas.process.exec.maven.plugin;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
+import org.honton.chas.url.extension.urlhandler.UrlStreamHandlerRegistry;
 
 public class HealthCheckUrl {
   private URL url;
@@ -15,8 +17,14 @@ public class HealthCheckUrl {
     return headers;
   }
 
-  public void setUrl(URL url) {
-    this.url = url;
+  public void setUrl(String url) throws MalformedURLException {
+    try {
+      this.url = new URL(url);
+    }
+    catch (MalformedURLException e) {
+      UrlStreamHandlerRegistry.register();
+      this.url = new URL(url);
+    }
   }
 
   @Override
