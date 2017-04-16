@@ -4,7 +4,7 @@
 
   <groupId>org.honton.chas</groupId>
   <artifactId>process-it-parent</artifactId>
-  <version>0.9.2-SNAPSHOT</version>
+  <version>0.9.2</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -29,6 +29,13 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+<modules>
+  <module>logFile</module>
+  <module>nullargs</module>
+  <module>order</module>
+  <module>url</module>
+</modules>
 
   <build>
 
