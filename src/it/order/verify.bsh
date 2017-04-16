@@ -7,7 +7,7 @@ import java.nio.file.Files;
     for(;;) {
       String line = reader.readLine();
       if(line == null) {
-        throw new AssertionError(expected + " not found");
+        throw new IllegalStateException(expected + " not found");
       }
       if(line.equals(expected)) {
         return;
@@ -28,9 +28,9 @@ import java.nio.file.Files;
 
   file = new File(basedir, "build.log" );
   reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);
-  findLine(reader, "[INFO] one started");
-  findLine(reader, "[ERROR] one again");
-  findLine(reader, "[INFO] two started");
-  findLine(reader, "[ERROR] two again");
+  findLine(reader, "[INFO] [order-one] one started");
+  findLine(reader, "[ERROR] [order-one] one again");
+  findLine(reader, "[INFO] [order-two] two started");
+  findLine(reader, "[ERROR] [order-two] two again");
 
 

@@ -7,6 +7,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.maven.plugin.logging.Log;
+import org.honton.chas.process.exec.maven.plugin.StdoutRedirector.LineWriter;
 
 public class ExecProcess {
   private Process process;
@@ -63,8 +64,18 @@ public class ExecProcess {
   }
 
   private void redirectStream() throws IOException {
-    new StdoutRedirector(process.getInputStream(), log, false);
-    new StdoutRedirector(process.getErrorStream(), log, true);
+    new StdoutRedirector(name, process.getInputStream(), new LineWriter() {
+      @Override
+      public void writeLine(String line) {
+        log.info(line);
+      }
+    });
+    new StdoutRedirector(name, process.getErrorStream(), new LineWriter() {
+      @Override
+      public void writeLine(String line) {
+        log.error(line);
+      }
+    });
   }
 
   public void destroy() {

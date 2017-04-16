@@ -8,14 +8,18 @@ import org.apache.maven.plugin.logging.Log;
 
 public class StdoutRedirector extends Thread {
 
-  private final BufferedReader in;
-  private final Log log;
-  private final boolean isErr;
+  interface LineWriter {
+    void writeLine(String line);
+  }
 
-  StdoutRedirector(InputStream in, Log log, boolean isErr) {
+  private final String streamName;
+  private final BufferedReader in;
+  private final LineWriter lineWriter;
+
+  StdoutRedirector(String streamName, InputStream in, LineWriter lineWriter) {
+    this.streamName = streamName;
     this.in = new BufferedReader(new InputStreamReader(in));
-    this.log = log;
-    this.isErr = isErr;
+    this.lineWriter = lineWriter;
     setDaemon(true);
     start();
   }
@@ -23,7 +27,12 @@ public class StdoutRedirector extends Thread {
   @Override
   public void run() {
     try {
-      while (oneLine()) {
+      for(;;){
+        String line = in.readLine();
+        if (line == null) {
+          return;
+        }
+        lineWriter.writeLine('[' + streamName + "] " + line);
       }
     } catch (IOException ignore) {
     } finally {
@@ -33,19 +42,5 @@ public class StdoutRedirector extends Thread {
       catch (IOException ignore) {
       }
     }
-  }
-
-  private boolean oneLine() throws IOException {
-    String line = in.readLine();
-    if(line == null) {
-      return false;
-    }
-    if(isErr) {
-      log.error(line);
-    }
-    else {
-      log.info(line);
-    }
-    return true;
   }
 }
