@@ -1,23 +1,22 @@
 package org.honton.chas.process.exec.maven.plugin;
 
-import com.google.common.collect.Lists;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.maven.plugin.logging.Log;
 
 public class ExecProcess {
-  private Process process = null;
-  private final List<StdoutRedirector> redirectors = Lists.newArrayList();
-  private File processLogFile = null;
+  private Process process;
+  private File processLogFile;
   private final String name;
+  private final Log log;
 
-  public ExecProcess(String name) {
+  public ExecProcess(String name, Log log) {
     this.name = name;
+    this.log = log;
   }
 
   public void setProcessLogFile(File emoLogFile) {
@@ -28,71 +27,73 @@ public class ExecProcess {
     return name;
   }
 
-  public void execute(File workingDirectory, Log log, Map<String, String> environment,
-      String... args) {
+  public void execute(File workingDirectory, Map<String, String> environment, List<String> args)
+      throws IOException {
     final ProcessBuilder pb = new ProcessBuilder();
-    log.info("Using working directory for this process: " + workingDirectory);
+    log.debug("Using working directory for this process: " + workingDirectory);
     pb.directory(workingDirectory);
     if (environment != null) {
       pb.environment().putAll(environment);
     }
+
+    removeNullElements(args);
+
     pb.command(args);
-    try {
-      process = pb.start();
-      pumpOutputToLog(process, log);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    if (processLogFile != null) {
+      redirectToLogFile(pb);
     }
-  }
-
-  private void pumpOutputToLog(Process process, Log mavenLog) {
+    process = pb.start();
     if (processLogFile == null) {
-      // pump to maven log
-      redirectors.add(new StdoutRedirector(new InputStreamReader(process.getInputStream()),
-          new MavenLogOutputStream(mavenLog, MavenLogOutputStream.INFO)));
-      redirectors.add(new StdoutRedirector(new InputStreamReader(process.getErrorStream()),
-          new MavenLogOutputStream(mavenLog, MavenLogOutputStream.ERROR)));
-    } else {
-      // pump to file log
-      if (!processLogFile.getParentFile().isDirectory() && !processLogFile.getParentFile()
-          .mkdir()) {
-        throw new IllegalStateException(
-            "Could not find or create directory containing " + processLogFile.getPath());
-      }
-
-      final FileOutputStream out = openFileOutputStream(processLogFile);
-      redirectors.add(new StdoutRedirector(new InputStreamReader(process.getInputStream()), out));
-      redirectors.add(new StdoutRedirector(new InputStreamReader(process.getErrorStream()), out));
-    }
-    // start all
-    for (StdoutRedirector redirector : redirectors) {
-      redirector.start();
+      redirectStream();
     }
   }
 
-  private static FileOutputStream openFileOutputStream(File file) {
-    final FileOutputStream out;
-    try {
-      out = new FileOutputStream(file);
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException("couldn't create or open file '" + file + "'", e);
+  private static void removeNullElements(List<String> args) {
+    for(ListIterator<String> it = args.listIterator(); it.hasNext(); ) {
+      if(it.next()==null) {
+        it.remove();
+      }
     }
-    return out;
+  }
+
+  private void redirectToLogFile(ProcessBuilder pb) throws IOException {
+    AbstractProcessMojo.ensureDirectory(processLogFile.getParentFile());
+    log.debug("redirecting out/err to " + processLogFile);
+    pb.redirectErrorStream(true).redirectOutput(processLogFile);
+  }
+
+  private void redirectStream() throws IOException {
+    new StdoutRedirector(process.getInputStream(), log, false);
+    new StdoutRedirector(process.getErrorStream(), log, true);
   }
 
   public void destroy() {
-    for (StdoutRedirector redirector : redirectors) {
-      redirector.stopIt();
-    }
+    log.info("Stopping process: " + name);
     process.destroy();
+    waitForExit();
   }
 
-  public void waitFor() {
+  private int waitForExit() {
+    for(int t = 0; t<30; ++t) {
+      try {
+        int rc = process.exitValue();
+        log.info("Stopped process: " + name + " exit code " + rc);
+        return rc;
+      } catch (IllegalThreadStateException e) {
+        log.debug("process " + name + " not exited after " + t + " seconds");
+        waitSeconds(1);
+      }
+    }
+    log.error("Process " + name + " not stopped after 30 seconds");
+    return -1;
+
+  }
+
+  private static void waitSeconds(int x) {
     try {
-      process.waitFor();
+      Thread.sleep(TimeUnit.SECONDS.toMillis(x));
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      Thread.currentThread().interrupt();
     }
   }
-
 }

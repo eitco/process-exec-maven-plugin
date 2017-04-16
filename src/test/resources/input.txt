@@ -1,2 +1,0 @@
-This is some kind of input file
-This is second line of some kind of input file

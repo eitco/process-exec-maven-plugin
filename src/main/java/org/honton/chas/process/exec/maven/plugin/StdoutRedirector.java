@@ -1,50 +1,51 @@
 package org.honton.chas.process.exec.maven.plugin;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import org.apache.maven.plugin.logging.Log;
 
 public class StdoutRedirector extends Thread {
-  private static final int BUFFER_SIZE = 2048;
 
-  private final Reader in;
-  private final OutputStream out;
+  private final BufferedReader in;
+  private final Log log;
+  private final boolean isErr;
 
-  private volatile boolean stopped = false;
-
-  StdoutRedirector(Reader in, OutputStream out) {
-    this.in = in;
-    this.out = out;
+  StdoutRedirector(InputStream in, Log log, boolean isErr) {
+    this.in = new BufferedReader(new InputStreamReader(in));
+    this.log = log;
+    this.isErr = isErr;
     setDaemon(true);
+    start();
   }
 
-  public void stopIt() {
-    stopped = true;
-    interrupt();
-  }
-
+  @Override
   public void run() {
     try {
-      char[] buffer = new char[BUFFER_SIZE];
-      int count;
-      while ((count = in.read(buffer, 0, BUFFER_SIZE)) >= 0) {
-        if (stopped) {
-          break;
-        }
-        out.write(new String(buffer).getBytes(), 0, count);
-        out.flush();
+      while (oneLine()) {
       }
-    } catch (Exception e) { // generally, we expect IOException or InterruptedException
-      if (!stopped) {
-        throw new RuntimeException("unexpected", e);
-      }
+    } catch (IOException ignore) {
     } finally {
-      if (out != null) {
-        try {
-          out.close();
-        } catch (IOException e) { // silent
-        }
+      try {
+        in.close();
+      }
+      catch (IOException ignore) {
       }
     }
+  }
+
+  private boolean oneLine() throws IOException {
+    String line = in.readLine();
+    if(line == null) {
+      return false;
+    }
+    if(isErr) {
+      log.error(line);
+    }
+    else {
+      log.info(line);
+    }
+    return true;
   }
 }

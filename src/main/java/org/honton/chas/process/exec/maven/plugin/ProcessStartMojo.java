@@ -1,10 +1,7 @@
 package org.honton.chas.process.exec.maven.plugin;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.Map;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -14,62 +11,61 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
 public class ProcessStartMojo extends AbstractProcessMojo {
 
-  @Override public void execute() throws MojoExecutionException, MojoFailureException {
+  @Override
+  public void execute() throws MojoExecutionException, MojoFailureException {
     if (skip) {
-      getLog().info("Skipping " + name + " due to configuration skip=true");
+      getLog().info("Skipping " + name);
       return;
     }
-    for (String arg : arguments) {
-      getLog().info("arg: " + arg);
-    }
-    if (environment != null) {
-      for (Map.Entry<String, String> entry : environment.entrySet()) {
-        getLog().info("env: " + entry.getKey() + "=" + entry.getValue());
+    if(getLog().isDebugEnabled()) {
+      for (String arg : arguments) {
+        getLog().debug("arg: " + arg);
+      }
+      if (environment != null) {
+        for (Map.Entry<String, String> entry : environment.entrySet()) {
+          getLog().debug("env: " + entry.getKey() + "=" + entry.getValue());
+        }
       }
     }
-    getLog().info("Full command line: " + Joiner.on(" ").useForNull("[null argument omitted]")
-        .join(arguments));
     try {
       startProcess();
-      if (waitForInterrupt) {
-        sleepUntilInterrupted();
-      }
-    } catch (Exception e) {
-      getLog().error(e);
+    }
+    catch (IOException e) {
+      throw new MojoExecutionException(e.getMessage(), e);
+    }
+    if (waitForInterrupt) {
+      sleepUntilInterrupted();
     }
   }
 
-  private void startProcess() {
-    final ExecProcess exec = new ExecProcess(name);
+  private void startProcess() throws IOException {
+    final ExecProcess exec = new ExecProcess(name, getLog());
     if (null != processLogFile) {
-      exec.setProcessLogFile(new File(processLogFile));
+      File plf = new File(processLogFile);
+      ensureDirectory(plf.getParentFile());
+      exec.setProcessLogFile(plf);
     }
     getLog().info("Starting process: " + exec.getName());
 
-    Iterable<String> nonNullArgumentList =
-        Iterables.filter(Arrays.asList(arguments), Predicates.notNull());
-    String[] nonNullArguments = Iterables.toArray(nonNullArgumentList, String.class);
-
-    exec.execute(processWorkingDirectory(), getLog(), environment, nonNullArguments);
-    CrossMojoState.addProcess(exec, getPluginContext());
+    exec.execute(processWorkingDirectory(), environment, arguments);
+    CrossMojoState.get(getPluginContext()).add(exec);
     new ProcessHealthCondition(getLog(), healthCheckUrl, waitAfterLaunch, healthCheckValidateSsl)
         .waitSecondsUntilHealthy();
     getLog().info("Started process: " + exec.getName());
   }
 
-  private File processWorkingDirectory() {
+  private File processWorkingDirectory() throws IOException {
+    String buildDir = project.getBuild().getDirectory();
     if (workingDir == null) {
-      return ensureDirectory(new File(project.getBuild().getDirectory()));
+      return ensureDirectory(new File(buildDir));
     }
 
-    // try to check if directory is absolute
+    // try to check if buildDir is absolute
     // https://github.com/bazaarvoice/maven-process-plugin/issues/11
-    File potentialWorkingDir = new File(workingDir);
-    if (potentialWorkingDir.isAbsolute() && potentialWorkingDir.exists() && potentialWorkingDir
-        .isDirectory()) {
-      return potentialWorkingDir;
+    File pwd = new File(workingDir);
+    if (!pwd.isAbsolute()) {
+      pwd= new File(buildDir, workingDir);
     }
-    return ensureDirectory(new File(project.getBuild().getDirectory(), workingDir));
+    return ensureDirectory(pwd);
   }
-
 }
