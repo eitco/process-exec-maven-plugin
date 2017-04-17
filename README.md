@@ -50,7 +50,7 @@ The health check url can be any scheme natively supported by JRE, or 'tcp'.  Add
     <plugin>
       <groupId>org.honton.chas</groupId>
       <artifactId>process-exec-maven-plugin</artifactId>
-      <version>0.9.1</version>
+      <version>0.9.2</version>
       <executions>
         <!--Start process 1, eg., a dropwizard app dependency-->
         <execution>
