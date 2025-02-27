@@ -43,7 +43,7 @@ Improve end-to-end integration testing with maven. Process Executor Plugin allow
 Killing the maven process (using Ctrl+C or kill \<pid> command) will stop all the processes started by the plugin.
 
 ## HealthCheckUrl
-The health check url can be any scheme natively supported by JRE, or 'tcp'.  Additional url schemes can be supported as described in [url-extension](https://github.com/chonton/url-extension)
+The health check url can be any scheme natively supported by JRE.
 
 ## POM example:
 ```xml

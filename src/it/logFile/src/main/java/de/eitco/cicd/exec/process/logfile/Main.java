@@ -20,6 +20,7 @@ public class Main {
             Thread.sleep(TimeUnit.SECONDS.toMillis(30));
         } catch (InterruptedException ignore) {
         }
+
         System.exit(0);
     }
 }

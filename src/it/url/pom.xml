@@ -30,24 +30,6 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <configuration>
-          <systemPropertyVariables>
-            <port>${server.port}</port>
-          </systemPropertyVariables>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
@@ -86,7 +68,7 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <name>server</name>
-              <healthCheckUrl>tcp://localhost:${server.port}</healthCheckUrl>
+              <healthCheckUrl>http://localhost:${server.port}</healthCheckUrl>
               <arguments>
                 <argument>${java.home}/bin/java</argument>
                 <argument>-jar</argument>
