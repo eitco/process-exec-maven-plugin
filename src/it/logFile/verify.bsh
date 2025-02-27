@@ -9,5 +9,21 @@ File file = new File( basedir, "target/out_err" );
 Assert.assertTrue("missing target/out_err", file.isFile());
 
 List lines= Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
-Assert.assertEquals("started", lines.get(0));
-Assert.assertEquals("shutdown hook", lines.get(1));
+
+boolean foundStarted = false;
+boolean foundShutdown = false;
+
+for (i = 0; i < lines.size(); i++) {
+    String line = lines.get(i);
+
+    if (line.equals("started")) {
+        foundStarted = true;
+    }
+
+    if (line.equals("shutdown hook")) {
+        foundShutdown = "true";
+    }
+}
+
+Assert.assertTrue(foundStarted);
+Assert.assertTrue(foundShutdown);

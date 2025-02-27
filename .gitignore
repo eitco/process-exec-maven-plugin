@@ -9,3 +9,4 @@ target
 *.log
 *.bak
 .DS_Store
+.git-versioned-pom.xml
