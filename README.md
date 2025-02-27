@@ -1,6 +1,8 @@
 process-exec-maven-plugin
 =========================
 
+forked from [chonton/process-exec-maven-plugin](https://github.com/chonton/process-exec-maven-plugin)
+
 Improve end-to-end integration testing with maven. Process Executor Plugin allows you to to start multiple processes in pre-integration-test phase in order, and then stops all the processes in post-integration-test phase, in reverse order. 
 
 ## Goals
@@ -45,65 +47,66 @@ The health check url can be any scheme natively supported by JRE, or 'tcp'.  Add
 
 ## POM example:
 ```xml
+
 <build>
-  <plugins>
-    <plugin>
-      <groupId>org.honton.chas</groupId>
-      <artifactId>process-exec-maven-plugin</artifactId>
-      <version>0.9.2</version>
-      <executions>
-        <!--Start process 1, eg., a dropwizard app dependency-->
-        <execution>
-          <id>switchboard-process</id>
-          <phase>pre-integration-test</phase>
-          <goals>
-            <goal>start</goal>
-          </goals>
-          <configuration>
-            <name>Switchboard2</name>
-            <workingDir>switchboard2</workingDir>
-            <waitForInterrupt>false</waitForInterrupt>
-            <healthCheckUrl>http://localhost:8381/healthcheck</healthCheckUrl>
-            <arguments>
-              <argument>${java.home}/bin/java</argument>
-              <argument>-jar</argument>
-              <argument>${basedir}/../../app/target/switchboard-${project.version}.jar</argument>
-              <argument>server</argument>
-              <argument>${basedir}/bin/switchboard.yaml</argument>
-            </arguments>
-          </configuration>
-        </execution>
-        <!--Start process 2, eg., another dropwizard app dependency-->
-        <execution>
-          <id>emodb-shovel-process</id>
-          <phase>pre-integration-test</phase>
-          <goals>
-            <goal>start</goal>
-          </goals>
-          <configuration>
-            <name>emodb-shovel</name>
-            <workingDir>shovel</workingDir>
-            <waitForInterrupt>false</waitForInterrupt>
-            <healthCheckUrl>http://localhost:8181/healthcheck</healthCheckUrl>
-            <arguments>
-              <argument>${java.home}/bin/java</argument>
-              <argument>-jar</argument>
-              <argument>${basedir}/../../app/target/emodb-shovel-app-${project.version}.jar</argument>
-              <argument>server</argument>
-              <argument>${basedir}/bin/config-local-dc.yaml</argument>
-            </arguments>
-          </configuration>
-        </execution>
-        <!--Stop all processes in reverse order-->
-        <execution>
-          <id>stop-all</id>
-          <phase>post-integration-test</phase>
-          <goals>
-            <goal>stop-all</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-  </plugins>
+    <plugins>
+        <plugin>
+            <groupId>de.eitco.cicd.exec</groupId>
+            <artifactId>process-exec-maven-plugin</artifactId>
+            <version>1.0.0</version>
+            <executions>
+                <!--Start process 1, eg., a dropwizard app dependency-->
+                <execution>
+                    <id>switchboard-process</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                        <goal>start</goal>
+                    </goals>
+                    <configuration>
+                        <name>Switchboard2</name>
+                        <workingDir>switchboard2</workingDir>
+                        <waitForInterrupt>false</waitForInterrupt>
+                        <healthCheckUrl>http://localhost:8381/healthcheck</healthCheckUrl>
+                        <arguments>
+                            <argument>${java.home}/bin/java</argument>
+                            <argument>-jar</argument>
+                            <argument>${basedir}/../../app/target/switchboard-${project.version}.jar</argument>
+                            <argument>server</argument>
+                            <argument>${basedir}/bin/switchboard.yaml</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+                <!--Start process 2, eg., another dropwizard app dependency-->
+                <execution>
+                    <id>emodb-shovel-process</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                        <goal>start</goal>
+                    </goals>
+                    <configuration>
+                        <name>emodb-shovel</name>
+                        <workingDir>shovel</workingDir>
+                        <waitForInterrupt>false</waitForInterrupt>
+                        <healthCheckUrl>http://localhost:8181/healthcheck</healthCheckUrl>
+                        <arguments>
+                            <argument>${java.home}/bin/java</argument>
+                            <argument>-jar</argument>
+                            <argument>${basedir}/../../app/target/emodb-shovel-app-${project.version}.jar</argument>
+                            <argument>server</argument>
+                            <argument>${basedir}/bin/config-local-dc.yaml</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+                <!--Stop all processes in reverse order-->
+                <execution>
+                    <id>stop-all</id>
+                    <phase>post-integration-test</phase>
+                    <goals>
+                        <goal>stop-all</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
 </build>
 ```
