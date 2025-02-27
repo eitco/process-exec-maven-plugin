@@ -1,4 +1,4 @@
-package org.honton.chas.process.example;
+package de.eitco.cicd.exec.process.example;
 
 import java.io.BufferedReader;
 import java.io.IOException;

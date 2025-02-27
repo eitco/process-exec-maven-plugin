@@ -22,9 +22,9 @@ import java.nio.file.Files;
   findLine(reader, "[INFO] Starting process: order-two");
   findLine(reader, "[INFO] Started process: order-two");
   findLine(reader, "[INFO] Stopping process: order-two");
-  findLine(reader, "[INFO] Stopped process: order-two exit code 143");
+  findLine(reader, "[INFO] Stopped process: order-two exit code 1");
   findLine(reader, "[INFO] Stopping process: order-one");
-  findLine(reader, "[INFO] Stopped process: order-one exit code 143");
+  findLine(reader, "[INFO] Stopped process: order-one exit code 1");
 
   file = new File(basedir, "build.log" );
   reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8);

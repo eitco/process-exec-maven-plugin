@@ -1,4 +1,4 @@
-package org.honton.chas.process.nullargs;
+package de.eitco.cicd.exec.process.nullargs;
 
 import org.junit.Assert;
 
