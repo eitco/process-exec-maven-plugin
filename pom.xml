@@ -48,9 +48,9 @@
     </developers>
 
     <scm>
-        <connection>https://github.com/eitco/process-exec-maven-plugin.git</connection>
-        <developerConnection>scm:git@github.com:eitco/process-exec-maven-plugin.git</developerConnection>
         <url>https://github.com/eitco/process-exec-maven-plugin</url>
+        <connection>scm:git:https://github.com/eitco/process-exec-maven-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/eitco/process-exec-maven-plugin.git</developerConnection>
     </scm>
 
     <properties>
