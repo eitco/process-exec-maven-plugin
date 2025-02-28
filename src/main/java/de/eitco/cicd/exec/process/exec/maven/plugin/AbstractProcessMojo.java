@@ -39,6 +39,9 @@ public abstract class AbstractProcessMojo extends AbstractMojo {
     @Parameter(property = "exec.healthCheckValidateSsl", defaultValue = "true")
     protected boolean healthCheckValidateSsl;
 
+    @Parameter(property = "exec.healthCheckIgnoreFailures", defaultValue = "false")
+    protected boolean healthCheckIgnoreFailures;
+
     @Parameter(property = "exec.waitAfterLaunch", required = false, defaultValue = "30")
     protected int waitAfterLaunch;
 

@@ -22,13 +22,20 @@ public class ProcessHealthCondition {
     private final HealthCheckUrl healthCheckUrl;
     private final int timeoutInSeconds;
     private final boolean validateSsl;
+    private final boolean ignoreHealthCheckErrors;
 
-    public ProcessHealthCondition(Log log, HealthCheckUrl healthCheckUrl, int timeoutInSeconds,
-                                  boolean validateSsl) {
+    public ProcessHealthCondition(
+        Log log,
+        HealthCheckUrl healthCheckUrl,
+        int timeoutInSeconds,
+        boolean validateSsl,
+        boolean ignoreHealthCheckErrors
+    ) {
         this.log = log;
         this.healthCheckUrl = healthCheckUrl;
         this.timeoutInSeconds = timeoutInSeconds;
         this.validateSsl = validateSsl;
+        this.ignoreHealthCheckErrors = ignoreHealthCheckErrors;
     }
 
     public void waitSecondsUntilHealthy() {
@@ -44,8 +51,13 @@ public class ProcessHealthCondition {
             }
             sleep(SECONDS_BETWEEN_CHECKS);
         }
-        throw new RuntimeException(
-            "Process was not healthy even after " + timeoutInSeconds + " seconds");
+
+        if (ignoreHealthCheckErrors) {
+            log.warn("Process was not healthy even after " + timeoutInSeconds + " seconds");
+        } else {
+            throw new RuntimeException(
+                "Process was not healthy even after " + timeoutInSeconds + " seconds");
+        }
     }
 
     private SSLSocketFactory getFactory() {

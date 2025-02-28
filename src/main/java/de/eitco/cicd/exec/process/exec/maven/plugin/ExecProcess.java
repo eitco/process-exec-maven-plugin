@@ -44,6 +44,7 @@ public class ExecProcess {
         if (processLogFile != null) {
             redirectToLogFile(pb);
         }
+        log.debug("Starting process: " + pb.command());
         process = pb.start();
         if (processLogFile == null) {
             redirectStream();
