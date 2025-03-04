@@ -25,6 +25,7 @@ Improve end-to-end integration testing with maven. Process Executor Plugin allow
     <argument>config.yaml</argument>
   </arguments>
 ```
+* __executable__: An optional argument to define the executable to call. If not set, the first argument will be the executable. The plugin will check if the executable exists. If not, and if the given executable is a relative path, the plugin will try to create an absolute path using the working directory. If this file does not exist, too, the executable argument will be used as-is. If it does exist, the absolute path will be used.
 * __environment__: Environment variables for the process
 ```xml
   <environment>

@@ -7,6 +7,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Mojo(name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
@@ -47,7 +49,28 @@ public class ProcessStartMojo extends AbstractProcessMojo {
         }
         getLog().info("Starting process: " + exec.getName());
 
-        exec.execute(processWorkingDirectory(), environment, arguments);
+        File workingDirectory = processWorkingDirectory();
+
+        List<String> finalArguments = new ArrayList<>();
+
+        if (executable != null && !executable.isEmpty()) {
+
+            File execFile = new File(executable);
+
+            if (!execFile.exists() && !execFile.isAbsolute()) {
+                execFile = new File(workingDirectory, executable);
+            }
+
+            if (!execFile.exists()) {
+                finalArguments.add(executable);
+            } else {
+                finalArguments.add(execFile.getPath());
+            }
+        }
+
+        finalArguments.addAll(arguments);
+
+        exec.execute(workingDirectory, environment, finalArguments);
         CrossMojoState.get(getPluginContext()).add(exec);
         new ProcessHealthCondition(getLog(), healthCheckUrl, waitAfterLaunch, healthCheckValidateSsl, healthCheckIgnoreFailures)
             .waitSecondsUntilHealthy();

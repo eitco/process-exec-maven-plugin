@@ -19,6 +19,9 @@ public abstract class AbstractProcessMojo extends AbstractMojo {
     @Parameter(property = "exec.arguments")
     protected List<String> arguments;
 
+    @Parameter(property = "exec.executable")
+    protected String executable;
+
     @Parameter(property = "exec.environment")
     protected Map<String, String> environment;
 
