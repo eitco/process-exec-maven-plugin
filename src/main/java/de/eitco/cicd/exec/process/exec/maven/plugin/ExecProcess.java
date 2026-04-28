@@ -86,6 +86,17 @@ public class ExecProcess {
         waitForExit();
     }
 
+    public int waitUntilExit() {
+        try {
+            final int rc = process.waitFor();
+            log.info("Process ended: " + name + " exit code " + rc);
+            return rc;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while waiting for process to end: " + name, e);
+        }
+    }
+
     private int waitForExit() {
         for (int t = 0; t < 30; ++t) {
             try {

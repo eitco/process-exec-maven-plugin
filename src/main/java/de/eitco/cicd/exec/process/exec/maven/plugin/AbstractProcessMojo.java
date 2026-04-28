@@ -51,6 +51,9 @@ public abstract class AbstractProcessMojo extends AbstractMojo {
     @Parameter(defaultValue = "false", property = "exec.waitForInterrupt")
     protected boolean waitForInterrupt;
 
+    @Parameter(defaultValue = "false", property = "exec.waitForProcessExit")
+    protected boolean waitForProcessExit;
+
     @Parameter(required = false, property = "exec.processLogFile")
     protected String processLogFile;
 

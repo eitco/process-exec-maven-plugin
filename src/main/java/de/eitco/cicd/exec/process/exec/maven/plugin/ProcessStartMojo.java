@@ -40,7 +40,7 @@ public class ProcessStartMojo extends AbstractProcessMojo {
         }
     }
 
-    private void startProcess() throws IOException {
+    private void startProcess() throws IOException, MojoFailureException {
         final ExecProcess exec = new ExecProcess(name, getLog());
         if (null != processLogFile) {
             File plf = new File(processLogFile);
@@ -71,9 +71,19 @@ public class ProcessStartMojo extends AbstractProcessMojo {
         finalArguments.addAll(arguments);
 
         exec.execute(workingDirectory, environment, finalArguments);
-        CrossMojoState.get(getPluginContext()).add(exec);
         new ProcessHealthCondition(getLog(), healthCheckUrl, waitAfterLaunch, healthCheckValidateSsl, healthCheckIgnoreFailures)
             .waitSecondsUntilHealthy();
+
+        if (waitForProcessExit) {
+            getLog().info("Waiting for process to end: " + exec.getName());
+            int rc = exec.waitUntilExit();
+            if (rc != 0) {
+                throw new MojoFailureException("Process exited with non-zero exit code " + rc + ": " + exec.getName());
+            }
+        } else {
+            CrossMojoState.get(getPluginContext()).add(exec);
+        }
+
         getLog().info("Started process: " + exec.getName());
     }
 
