@@ -74,14 +74,18 @@ public class ProcessStartMojo extends AbstractProcessMojo {
         new ProcessHealthCondition(getLog(), healthCheckUrl, waitAfterLaunch, healthCheckValidateSsl, healthCheckIgnoreFailures)
             .waitSecondsUntilHealthy();
 
+        CrossMojoState.get(getPluginContext()).add(exec);
         if (waitForProcessExit) {
             getLog().info("Waiting for process to end: " + exec.getName());
-            int rc = exec.waitUntilExit();
+            int rc = exec.waitUntilExit(waitForProcessExitTimeout);
+            if (rc == ExecProcess.WAIT_TIMEOUT_EXIT_CODE) {
+                exec.destroy();
+                throw new MojoFailureException(
+                    "Timed out waiting for process to exit after " + waitForProcessExitTimeout + " seconds: " + exec.getName());
+            }
             if (rc != 0) {
                 throw new MojoFailureException("Process exited with non-zero exit code " + rc + ": " + exec.getName());
             }
-        } else {
-            CrossMojoState.get(getPluginContext()).add(exec);
         }
 
         getLog().info("Started process: " + exec.getName());

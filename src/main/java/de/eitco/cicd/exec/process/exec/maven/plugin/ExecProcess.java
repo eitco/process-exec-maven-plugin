@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class ExecProcess {
+    public static final int WAIT_TIMEOUT_EXIT_CODE = Integer.MIN_VALUE;
+
     private Process process;
     private File processLogFile;
     private final String name;
@@ -87,8 +89,22 @@ public class ExecProcess {
     }
 
     public int waitUntilExit() {
+        return waitUntilExit(0);
+    }
+
+    public int waitUntilExit(int timeoutSeconds) {
         try {
-            final int rc = process.waitFor();
+            final boolean exited;
+            if (timeoutSeconds <= 0) {
+                process.waitFor();
+                exited = true;
+            } else {
+                exited = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+            }
+            if (!exited) {
+                return WAIT_TIMEOUT_EXIT_CODE;
+            }
+            final int rc = process.exitValue();
             log.info("Process ended: " + name + " exit code " + rc);
             return rc;
         } catch (InterruptedException e) {
